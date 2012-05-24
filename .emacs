@@ -18,15 +18,23 @@
 (add-hook 'go-mode-hook 
           #'(lambda () (setq indent-tabs-mode nil)))
 (when (load "flymake" t)
+  (defun flymake-go-init ()
+     (list "go" (list "build"))
+     )
+   (add-to-list 'flymake-allowed-file-name-masks '("\\.go\\'" flymake-go-init))
+ 
+)
+(when (load "flymake" t)
   (defun flymake-pyflakes-init ()
     (let* ((temp-file (flymake-init-create-temp-buffer-copy
                'flymake-create-temp-inplace))
        (local-file (file-relative-name
             temp-file
             (file-name-directory buffer-file-name))))
-      (list "/home/shane/spacemonkey/flud/flud-epylint"  (list local-file))))
+      (list "flud-epylint"  (list local-file))))
    (add-to-list 'flymake-allowed-file-name-masks
-             '("\\.py\\'" flymake-pyflakes-init)))
+             '("\\.py\\'" flymake-pyflakes-init))
+   )
 (require 'package)
 (add-to-list 'package-archives
          '("marmalade" . "http://marmalade-repo.org/packages/"))
