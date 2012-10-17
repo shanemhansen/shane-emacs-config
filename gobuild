@@ -3,10 +3,6 @@ import subprocess
 import os
 import shlex
 import sys
-#just for debugging
-with open('/tmp/foo', 'w') as f:
-    f.write(str(sys.argv))
-    f.write('\n')
 
 def run(cmd):
     return subprocess.check_output(shlex.split(cmd))[:-1]
@@ -15,7 +11,11 @@ if filename.endswith('.go'):
     if filename[0] != '/':
         filename = os.path.join(os.getcwd(), filename)
 
-base = os.path.join(os.environ['GOPATH'], 'src/')
+if 'GOPATH' in os.environ:
+    base = os.path.join(os.environ['GOPATH'], 'src/')
+else:
+    base = os.path.join(os.environ['GOROOT'], 'src/pkg/')
+
 relative_filename = filename.replace(base,'')
 package = relative_filename.replace('/'+os.path.basename(relative_filename), '')
 
