@@ -14,6 +14,7 @@ if filename.endswith('.go'):
 if 'GOPATH' in os.environ:
     base = os.path.join(os.environ['GOPATH'], 'src/')
 else:
+    #For golang development
     base = os.path.join(os.environ['GOROOT'], 'src/pkg/')
 
 relative_filename = filename.replace(base,'')
@@ -21,12 +22,13 @@ package = relative_filename.replace('/'+os.path.basename(relative_filename), '')
 
 go = os.path.join(os.environ['GOROOT'], 'bin', 'go')
 try:
-    if filename.endswith('.proto'):
-        filename = filename.replace(os.getcwd()+'/', '')
-        subprocess.call(['protoc', '--go_out=.', filename])
-    elif 'test' in filename:
+    if 'test' in filename:
         subprocess.call(['go', 'test', package])
     else:
-        subprocess.call(['go', 'build', package])
+        #check for main files
+        if open(filename).read(len("package main")) == "package main":
+            subprocess.call(['go', 'build', filename])
+        else:
+            subprocess.call(['go', 'build', package])
 except:
     pass
