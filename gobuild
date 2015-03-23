@@ -3,6 +3,7 @@ import subprocess
 import os
 import shlex
 import sys
+import tempfile
 
 def run(cmd):
     return subprocess.check_output(shlex.split(cmd))[:-1]
@@ -14,21 +15,23 @@ if filename.endswith('.go'):
 if 'GOPATH' in os.environ:
     base = os.path.join(os.environ['GOPATH'], 'src/')
 else:
-    #For golang development
-    base = os.path.join(os.environ['GOROOT'], 'src/pkg/')
-
-relative_filename = filename.replace(base,'')
-package = relative_filename.replace('/'+os.path.basename(relative_filename), '')
-
-go = os.path.join(os.environ['GOROOT'], 'bin', 'go')
+    os.exit(0)
+# are we off the go path?
+if base not in filename:
+    package = filename
+else:
+    relative_filename = filename.replace(base,'')
+    package = relative_filename.replace('/'+os.path.basename(relative_filename), '')
 try:
     if 'test' in filename:
-        subprocess.call(['go', 'test', package])
+        subprocess.call(['timeoue', '5', 'go', 'test', package])
     else:
         #check for main files
-        if open(filename).read(len("package main")) == "package main":
-            subprocess.call(['go', 'build', filename])
-        else:
-            subprocess.call(['go', 'build', package])
+        _, fname = tempfile.mkstemp()
+        try:
+            subprocess.call(['go', 'build','-o', fname, package])
+        finally:
+            os.remove(fname)
 except:
     pass
+
